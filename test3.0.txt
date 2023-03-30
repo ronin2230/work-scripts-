@@ -1,0 +1,47 @@
+#Import the modules
+Import-Module Microsoft.PowerShell.Utility
+Import-Module Microsoft.Office.Interop.Excel
+
+#Declare variables
+$xlsxFile = "SFW Requests.xlsx"
+$csvFile = "C:\Users\Rifer01\ticket queue host ip.csv"
+$exportFile = "TicketIntel"
+$exportLocation = "C:\Users\Rifer01\test"
+
+#Open Excel and the file
+$Excel = New-Object -ComObject Excel.Application
+$Workbook = $Excel.Workbooks.Open($xlsxFile)
+$sheet = $Workbook.Sheets.Item(1)
+
+#Import the csv
+$csv = Import-Csv -Path $csvFile
+
+#Set up variables for the loop
+$row = 2
+$lastRow = $sheet.UsedRange.Rows.Count
+
+#Loop through each row in the excel
+while ($row -le $lastRow) {
+
+#Set up variables for the loop
+    $hostname = $sheet.Cells.Item($row,2).Text
+    $assetTag = $sheet.Cells.Item($row,3).Text
+    $serial = $sheet.Cells.Item($row,4).Text
+    $requestNo = $sheet.Cells.Item($row,5).Text
+
+#Find the hostname and add the ip, asset tag, serial, and request no
+    if($hostname -eq $csv.hostname){
+        $hostIP = $csv.hostIP
+        $sheet.Cells.Item($row,6).Value2 = $hostIP
+        $sheet.Cells.Item($row,7).Value2 = $assetTag
+        $sheet.Cells.Item($row,8).Value2 = $serial
+        $sheet.Cells.Item($row,9).Value2 = $requestNo
+    }
+    $row++
+}
+
+#Save the file
+$Workbook.SaveAs($exportLocation + '\' + $exportFile + '.xlsx')
+
+#Close Excel
+$Excel.Quit()
